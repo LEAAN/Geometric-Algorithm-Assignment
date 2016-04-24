@@ -1,0 +1,355 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+
+<style type="text/css">
+.on { 
+border:1px outset;
+color:#369;
+background:#efefef; 
+}
+
+.off {
+border:1px outset;
+color:#369;
+background:#f9d543; 
+}
+</style>
+
+<script language="javascript">
+function togglestyle(el){
+    if(el.className == "on") {
+    	el.className="off";
+    	pause();
+    } else {
+    	el.className="on";
+    	begin();
+
+    }
+}
+</script>
+
+
+    <title></title>
+    <meta http-equiv="content" content="text/html" charset="utf-8"/>
+	<script type="text/javascript" src="d3.js"></script>
+	<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+</head>
+
+<body>
+
+	<script>
+    var width = 1200;
+	var height = 600;
+	var svg = d3.select("body")
+		.append("svg")
+		.attr("width", width)
+		.attr("height", height)
+		//.fill('yellow')
+
+	svg.append("rect")
+		.attr("width", "100%")
+		.attr("height", "100%")
+		.attr("fill", "pink");
+
+
+	var circleNum = [];
+//Choose number of dots
+	function disp_prompt()
+  {
+  var name=prompt("Number of Red/Blue Dots","Only Even Number Please (⊙v⊙) !")
+  if (name!=null && name!="")
+    {
+    console.log("Number of Red/Blue Dots is " + name);
+    circleNum = parseInt(name)*2;
+    clearer();
+    initial(circleNum);
+    //console.log(circleNum);
+    }
+  }
+  	function clearer(){
+  		d3.select('svg').selectAll("circle").remove();
+  	 circleSet = [];
+	 circleAngle = [];
+	//红蓝两组
+	 circleRed = [];
+ 	 circleBlue = [];
+  	};
+	//初始位置
+	var xPosition = 100;
+	var yPosition = 100;
+	//var circleNum = 4;
+	var circleSet = [];
+	var circleAngle = [];
+	//红蓝两组
+	var circleRed = [];
+ 	var circleBlue = [];
+ 	function initial(circleNum){
+	for(var i = 0;i< circleNum; i ++){
+		circleAngle[i] = Math.round(Math.random()*360);
+		if(i%2 == 0){
+		circleSet[i] = svg.append("circle")
+						.attr("cx", xPosition+i*70)
+						.attr("cy", yPosition)
+						.attr("r", 10)
+						.style("fill","red")
+						.datum('r')
+		// var cx = circleSet[i].attr("cx");
+		// var cy = circleSet[i].attr("cy");
+		circleRed.push(circleSet[i]);
+		}
+		else{
+			circleSet[i] = svg.append("circle")
+						.attr("cx", xPosition+i*70)
+						.attr("cy", yPosition)
+						.attr("r", 10)
+						.style("fill","blue")
+						.datum('b');
+		// var cx = circleSet[i].attr("cx");
+		// var cy = circleSet[i].attr("cy");
+		circleBlue.push(circleSet[i]);
+		}	
+	}
+	}
+	var step = 5;
+	function move(){
+		for(var i = 0;i< circleSet.length; i ++){
+
+			var nowX = parseInt(circleSet[i].attr("cx"));
+			var nowY = parseInt(circleSet[i].attr("cy"));
+			var updateX = step* Math.cos(circleAngle[i]*0.017453293) + nowX
+			var updateY = step* Math.sin(circleAngle[i]*0.017453293) + nowY
+			if(updateX >= (width - 5)){
+				circleAngle[i] = (-(180 + circleAngle[i]));
+			}
+			if(updateX <= 5 ){ 
+				circleAngle[i] = (-(180 + circleAngle[i]));
+			}
+			if(updateY >= (height-5)){
+				circleAngle[i] = (-180-(180 + circleAngle[i]));
+			}
+			if(updateY <= 5){
+				circleAngle[i] = (-180-(180 + circleAngle[i]));
+			}
+			var updateX = step* Math.cos(circleAngle[i]*0.017453293) + nowX
+			var updateY = step* Math.sin(circleAngle[i]*0.017453293) + nowY
+			circleSet[i].transition()
+						.duration(0)
+						.attr("cx", updateX)
+						.attr("cy", updateY);
+			
+			}
+			
+	}
+
+	var line = svg.append("line")          // attach a line
+						.style("stroke", "black")  // colour the line
+						.attr("x1", 0)     // x position of the first end of the line
+						.attr("y1", 0)      // y position of the first end of the line
+						.attr("x2", width)     // x position of the second end of the line
+						.attr("y2", height);				
+	function moveLine(){
+			var p1x = parseInt(line.attr("x1"));
+			var p1y = parseInt(line.attr("y1"));
+			var p2x = parseInt(line.attr("x2"));
+			var p2y = parseInt(line.attr("y2"));
+				
+			if(p1x < width && p1y ==0){
+				line.transition()
+					.duration(0)
+					.attr("x1", p1x + step)     
+					.attr("y1", p1y)      
+					.attr("x2", p2x - step)    
+					.attr("y2", p2y);
+			}else if(p1x == width && p1y < height){
+				line.transition()
+					.duration(0)
+					.attr("x1", p1x)     
+					.attr("y1", p1y + step)      
+					.attr("x2", p2x )    
+					.attr("y2", p2y - step);
+			}else if(p1x > 0 && p1y == height){
+				line.transition()
+					.duration(0)
+					.attr("x1", p1x - step)     
+					.attr("y1", p1y)      
+					.attr("x2", p2x + step)    
+					.attr("y2", p2y);
+			}else if(p1x == 0 && p1y > 0 ){
+				line.transition()
+					.duration(0)
+					.attr("x1", p1x)     
+					.attr("y1", p1y - step)      
+					.attr("x2", p2x)    
+					.attr("y2", p2y + step);
+			}
+	}
+
+	function begin(){
+		setDot=setInterval(move,1);
+		setLine=setInterval(moveLine,10);
+		
+	}
+		function pause(){
+		clearInterval(setDot);
+		clearInterval(setLine);
+		judge();
+	}
+
+function intersectpoint(a,b,c,d){ 
+  var x0; 
+  var y0; 
+  var i =a-c; 
+  if (i != 0) 
+  {
+  x0=(d-b)/(a-c);
+  y0=(a*d-b*c)/(a-c);
+  return [x0,y0];
+  }
+  else if (i==0){return null}
+} 
+
+function checkotherset(a,b,c,d,x,y){ 
+  var x0; 
+  var y0; 
+  var i=a-c; 
+  if (i != 0) 
+  {
+  x0=(d-b)/(a-c);
+  y0=(a*d-b*c)/(a-c);
+  }
+ if(x0>=x){
+    if (x0<=y)
+    {
+    return [x0,y0];
+  }
+  else if(x0>y)
+  {return null;}
+  }
+  else{return null;}
+} 
+
+
+function judge(){
+
+ var red = [];
+ var blue = [];
+for (var i = circleRed.length - 1; i >= 0; i--) {
+	var cx = parseInt(circleRed[i].attr('cx'));
+	var cy = parseInt(circleRed[i].attr("cy"));
+	red.push([cx,cy]);
+};
+	console.log(red);
+for (var i = circleBlue.length - 1; i >= 0; i--) {
+	var cx = parseInt(circleBlue[i].attr('cx'));
+	var cy = parseInt(circleBlue[i].attr("cy"));
+	blue.push([cx,cy]);
+};
+	console.log(blue);
+
+ var intersect=[];
+ var check=[];
+ var range=[];
+ var record=[];
+ var result=[];
+ //result = Array.from(result); 
+ //console.log('Initial type of result: ' + typeof result)
+ var endPoint1 = [parseInt(line.attr('x1')),parseInt(line.attr('y1'))];
+ var endPoint2 = [parseInt(line.attr('x2')),parseInt(line.attr('y2'))];
+ console.log('endPoint2 is :')
+ console.log(endPoint2);
+ var select = endPoint1;
+ red.push(endPoint1);
+ blue.push(endPoint2);
+  console.log('Red set are : ');
+  console.log(red);
+  console.log('Blue set are : ');
+  console.log(blue);
+
+
+  // intersect.push([0,select[1]]);
+    for(i=0;i<red.length;i++)
+      {
+          if (intersectpoint (select[0],select[1],red[i][0],red[i][1])!=null)
+          {
+            intersect.push(intersectpoint (select[0],select[1],red[i][0],red[i][1]));
+          }
+      }
+ intersect.sort(function(a, b){return a[0]-b[0]});
+  for (j=0;j<intersect.length;j++)
+    {
+      var counter=0;
+      for(i=0;i<red.length;i++)
+        { 
+          var k=(intersect[j][0]+0.1)*select[0]+select[1];
+          if ((intersect[j][0]+0.1)*red[i][0]+red[i][1]>k)
+          {
+            counter++;
+          }
+        }
+        // document.write(counter);
+          if (counter == ((red.length - 1)/2))
+          {
+            range.push(intersect[j][0]);
+            if ((j+2)>intersect.length){
+            range.push(1000);}
+            else {range.push(intersect[j+1][0]);}
+          }
+          // document.write(range);
+    }
+  if (range != null)
+  {
+  for (i=0;i<blue.length;i++)
+  {
+  if (checkotherset(select[0],select[1],blue[i][0],blue[i][1],range[0],range[1]) != null)
+    {
+    check.push(checkotherset(select[0],select[1],blue[i][0],blue[i][1],range[0],range[1]));
+    record.push([blue[i][0],blue[i][1]]);
+    }
+  }
+  // document.write(check,"next/");
+  // document.write(record);
+
+  for (j=0;j<check.length;j++)
+    {
+          var counter=0;
+      for(i=0;i<blue.length;i++)
+        { 
+          var k=(check[j][0])*record[j][0]+record[j][1];
+          if ((check[j][0])*blue[i][0]+blue[i][1]>k)
+          {
+            counter++;
+          }
+        }
+        // document.write(counter);
+          if (counter == ((blue.length - 1)/2))
+          {
+           result.push([record[j][0],record[j][1]]);
+          }
+    }
+     //document.write(result);
+  }
+ 
+
+// 擦邪了门了  
+if (result[0] != null){
+	if(result[0][0] == endPoint2[0]){
+		alert("Nice!");
+	}
+	else{
+	alert('Well...Try Again!');		
+	}
+}
+else{
+	alert('Well...Try Again!');
+}
+ red.pop(endPoint1);
+ blue.pop(endPoint2);
+//judge ends here
+}
+
+	</script>
+	<input type="button" id="btn" value="Start/Pause" class="off" onclick="togglestyle(this)" />
+<input type="button" onclick="disp_prompt()" value="Number of Red/Blue Dots" />
+</body>
+</html>
